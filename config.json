@@ -1,0 +1,47 @@
+{
+  "sources": {
+    "flightglobal": {
+      "name": "FlightGlobal",
+      "url": "https://www.flightglobal.com/rss",
+      "type": "rss",
+      "enabled": true
+    },
+    "aviationweek": {
+      "name": "Aviation Week",
+      "url": "https://aviationweek.com/rss.xml",
+      "type": "rss",
+      "enabled": true
+    },
+    "simpleflying": {
+      "name": "Simple Flying",
+      "url": "https://simpleflying.com/feed/",
+      "type": "rss",
+      "enabled": true
+    },
+    "airlive": {
+      "name": "AirLive",
+      "url": "https://www.airlive.net/feed/",
+      "type": "rss",
+      "enabled": true
+    },
+    "atw": {
+      "name": "ATW Online",
+      "url": "https://atwonline.com/rss",
+      "type": "rss",
+      "enabled": true
+    },
+    "reuters_aerospace": {
+      "name": "Reuters Aerospace",
+      "url": "https://www.reuters.com/business/aerospace-defense/rss",
+      "type": "rss",
+      "enabled": true
+    }
+  },
+  "settings": {
+    "max_news_per_source": 5,
+    "max_news_for_summary": 20,
+    "final_news_count": 8,
+    "date_format": "%Y-%m-%d",
+    "timezone": "Asia/Shanghai"
+  }
+}

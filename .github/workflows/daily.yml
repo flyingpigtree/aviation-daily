@@ -1,0 +1,95 @@
+name: Daily Aviation Report
+
+on:
+  # 每天北京时间8:00 (UTC 0:00)
+  schedule:
+    - cron: '0 0 * * *'
+  
+  # 允许手动触发
+  workflow_dispatch:
+
+# 权限设置
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+# 并发控制
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  generate-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. 检出代码
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      # 2. 设置Python环境
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      # 3. 安装依赖
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+      
+      # 4. 创建数据目录
+      - name: Setup Data Directory
+        run: mkdir -p data
+      
+      # 5. 抓取新闻
+      - name: Fetch News
+        env:
+          KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
+        run: |
+          echo "开始抓取新闻..."
+          python scripts/fetch.py
+      
+      # 6. 生成AI摘要
+      - name: Generate Summaries
+        env:
+          KIMI_API_KEY: ${{ secrets.KIMI_API_KEY }}
+        run: |
+          echo "开始生成中文摘要..."
+          python scripts/summarize.py
+      
+      # 7. 构建网站
+      - name: Build Site
+        run: |
+          echo "开始构建网站..."
+          python scripts/build.py
+      
+      # 8. 提交数据到Git历史（保留记录）
+      - name: Commit Data
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add data/
+          git diff --quiet && git diff --staged --quiet || git commit -m "Update daily news data for $(date +%Y-%m-%d)"
+          git push || echo "No changes to commit"
+      
+      # 9. 部署到GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: github.ref == 'refs/heads/main'
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs
+          publish_branch: gh-pages
+          cname: ${{ secrets.CUSTOM_DOMAIN }}
+          commit_message: "Deploy: Daily report for $(date +%Y-%m-%d)"
+      
+      # 10. 发送通知（可选）
+      - name: Notification
+        if: failure()
+        run: |
+          echo "::error::每日报告生成失败，请检查日志"
