@@ -68,16 +68,7 @@ jobs:
           echo "开始构建网站..."
           python scripts/build.py
       
-      # 8. 提交数据到Git历史（保留记录）
-      - name: Commit Data
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add data/
-          git diff --quiet && git diff --staged --quiet || git commit -m "Update daily news data for $(date +%Y-%m-%d)"
-          git push || echo "No changes to commit"
-      
-      # 9. 部署到GitHub Pages
+      # 8. 部署到GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/main'
@@ -88,7 +79,7 @@ jobs:
           cname: ${{ secrets.CUSTOM_DOMAIN }}
           commit_message: "Deploy: Daily report for $(date +%Y-%m-%d)"
       
-      # 10. 发送通知（可选）
+      # 9. 发送通知（可选）
       - name: Notification
         if: failure()
         run: |
