@@ -68,7 +68,7 @@ def summarize_with_kimi(news_list):
     try:
         if USE_SDK:
             response = client.chat.completions.create(
-                model="kimi-k2p5",
+                model="moonshot-v1-8k",
                 messages=[
                     {"role": "system", "content": "你是一个专业的航空行业分析师，擅长将英文航空新闻翻译并摘要成简洁中文。"},
                     {"role": "user", "content": prompt}
@@ -84,7 +84,7 @@ def summarize_with_kimi(news_list):
                 "Content-Type": "application/json"
             }
             data = {
-                "model": "kimi-k2p5",
+                "model": "moonshot-v1-8k",
                 "messages": [
                     {"role": "system", "content": "你是一个专业的航空行业分析师，擅长将英文航空新闻翻译并摘要成简洁中文。"},
                     {"role": "user", "content": prompt}
