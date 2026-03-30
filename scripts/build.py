@@ -96,21 +96,25 @@ def load_summarized_news(date_str=None):
     """加载摘要新闻"""
     if date_str is None:
         date_str = datetime.now().strftime('%Y-%m-%d')
-    
+
     filename = f'data/summarized_news_{date_str}.json'
-    
+
     if not os.path.exists(filename):
-        # 尝试找最新的
-        data_files = [f for f in os.listdir('data') if f.startswith('summarized_news_')]
-        if data_files:
-            filename = f'data/{sorted(data_files)[-1]}'
-            date_str = filename.split('_')[-1].split('.')[0]
-        else:
-            return None, date_str
-    
+        print(f"❌ 错误：找不到当天数据文件 {filename}")
+        print("可能原因：")
+        print("  1. fetch.py 没有抓取到新闻")
+        print("  2. summarize.py 生成摘要失败（检查 KIMI_API_KEY）")
+        print("  3. 今天是周末/节假日，新闻源没有更新")
+        return None, date_str
+
     with open(filename, 'r', encoding='utf-8') as f:
         data = json.load(f)
-    
+
+    # 验证数据日期匹配
+    if data.get('date') != date_str:
+        print(f"⚠️ 警告：数据文件日期 ({data.get('date')}) 与预期 ({date_str}) 不匹配")
+        return None, date_str
+
     return data, date_str
 
 

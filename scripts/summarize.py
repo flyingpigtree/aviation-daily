@@ -124,17 +124,15 @@ def load_raw_news():
     """加载原始新闻"""
     today = datetime.now().strftime('%Y-%m-%d')
     filename = f'data/raw_news_{today}.json'
-    
+
     if not os.path.exists(filename):
-        # 尝试找最近的新闻文件
-        data_files = [f for f in os.listdir('data') if f.startswith('raw_news_')]
-        if data_files:
-            filename = f'data/{sorted(data_files)[-1]}'
-        else:
-            raise FileNotFoundError("找不到新闻数据文件")
-    
+        raise FileNotFoundError(f"找不到当天新闻数据文件: {filename}")
+
     with open(filename, 'r', encoding='utf-8') as f:
-        return json.load(f)
+        data = json.load(f)
+
+    print(f"✓ 加载当天新闻: {filename}, 共 {len(data)} 条")
+    return data
 
 
 def save_summarized_news(news_list):

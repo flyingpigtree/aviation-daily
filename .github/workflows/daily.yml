@@ -53,7 +53,10 @@ jobs:
         run: |
           echo "开始抓取新闻..."
           python scripts/fetch.py
-      
+          echo ""
+          echo "检查抓取结果..."
+          ls -la data/raw_news_*.json || echo "❌ 未找到新闻数据文件"
+
       # 6. 生成AI摘要
       - name: Generate Summaries
         env:
@@ -61,14 +64,41 @@ jobs:
         run: |
           echo "开始生成中文摘要..."
           python scripts/summarize.py
-      
-      # 7. 构建网站
+          echo ""
+          echo "检查摘要结果..."
+          ls -la data/summarized_news_*.json || echo "❌ 未找到摘要数据文件"
+
+      # 7. 验证数据文件
+      - name: Verify Data Files
+        run: |
+          TODAY=$(date +%Y-%m-%d)
+          echo "今天日期: $TODAY"
+          echo ""
+          echo "检查原始新闻文件..."
+          if [ -f "data/raw_news_$TODAY.json" ]; then
+            echo "✓ raw_news_$TODAY.json 存在"
+            cat "data/raw_news_$TODAY.json" | jq '. | length' | xargs echo "  新闻数量:"
+          else
+            echo "❌ raw_news_$TODAY.json 不存在"
+            exit 1
+          fi
+          echo ""
+          echo "检查摘要文件..."
+          if [ -f "data/summarized_news_$TODAY.json" ]; then
+            echo "✓ summarized_news_$TODAY.json 存在"
+            cat "data/summarized_news_$TODAY.json" | jq '.news_count' | xargs echo "  摘要数量:"
+          else
+            echo "❌ summarized_news_$TODAY.json 不存在"
+            exit 1
+          fi
+
+      # 8. 构建网站
       - name: Build Site
         run: |
           echo "开始构建网站..."
           python scripts/build.py
       
-      # 8. 部署到GitHub Pages
+      # 9. 部署到GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         if: github.ref == 'refs/heads/main'
@@ -78,9 +108,21 @@ jobs:
           publish_branch: gh-pages
           cname: ${{ secrets.CUSTOM_DOMAIN }}
           commit_message: "Deploy: Daily report for $(date +%Y-%m-%d)"
-      
-      # 9. 发送通知（可选）
-      - name: Notification
+
+      # 10. 发送成功通知
+      - name: Success Notification
+        if: success()
+        run: |
+          echo "✅ 每日报告生成成功！"
+          TODAY=$(date +%Y-%m-%d)
+          echo "日期: $TODAY"
+
+      # 11. 发送失败通知
+      - name: Failure Notification
         if: failure()
         run: |
-          echo "::error::每日报告生成失败，请检查日志"
+          echo "::error::❌ 每日报告生成失败！"
+          echo "::error::请检查以下可能原因："
+          echo "::error::  1. KIMI_API_KEY 是否有效"
+          echo "::error::  2. RSS 源是否可访问"
+          echo "::error::  3. 查看上面的步骤日志获取详细错误信息"
