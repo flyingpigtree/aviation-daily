@@ -23,19 +23,40 @@ def fetch_rss(source_id, source_config):
     """抓取RSS源"""
     if not source_config.get('enabled', True):
         return []
-    
+
     try:
         feed = feedparser.parse(source_config['url'])
         items = []
-        
-        for entry in feed.entries[:config['settings']['max_news_per_source']]:
+
+        today = datetime.now().date()
+        yesterday = today - timedelta(days=1)
+
+        for entry in feed.entries[:config['settings']['max_news_per_source'] * 2]:  # 多抓一些用于过滤
             # 提取日期
             published = entry.get('published', entry.get('updated', ''))
-            
+
+            # 尝试解析日期
+            news_date = None
+            try:
+                # 尝试常见日期格式
+                for date_field in ['published_parsed', 'updated_parsed', 'published', 'updated']:
+                    if hasattr(entry, date_field):
+                        date_val = getattr(entry, date_field)
+                        if date_val:
+                            if isinstance(date_val, tuple):
+                                news_date = datetime(*date_val[:6]).date()
+                            break
+            except Exception:
+                pass
+
+            # 如果没有解析到日期或日期不是今天/昨天，跳过
+            if news_date and news_date not in [today, yesterday]:
+                continue
+
             # 生成唯一ID
             unique_str = f"{entry.title}{entry.link}"
             news_id = hashlib.md5(unique_str.encode()).hexdigest()[:12]
-            
+
             items.append({
                 'id': news_id,
                 'title': entry.title,
@@ -45,10 +66,13 @@ def fetch_rss(source_id, source_config):
                 'source': source_config['name'],
                 'domain': get_domain(entry.link)
             })
-        
+
+            if len(items) >= config['settings']['max_news_per_source']:
+                break
+
         print(f"✓ {source_config['name']}: {len(items)}条")
         return items
-        
+
     except Exception as e:
         print(f"✗ {source_config['name']}: {str(e)}")
         return []
