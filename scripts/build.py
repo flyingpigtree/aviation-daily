@@ -24,22 +24,30 @@ INDEX_TEMPLATE = '''<!DOCTYPE html>
     <div class="container">
         <header>
             <h1>Aviation Daily</h1>
-            <p class="subtitle">每日国际航空新闻精选</p>
+            <p class="subtitle">每日国际航空产业情报</p>
             <p class="date">{{ date }} · {{ weekday }}</p>
+            <div class="filter-info">
+                <span class="filter-tag">✈️ 波音空客动态</span>
+                <span class="filter-tag">📦 供应链情报</span>
+                <span class="filter-tag">⚠️ 安全事件</span>
+                <span class="filter-tag">🌍 地缘政治</span>
+            </div>
         </header>
         
         <main>
             {% for item in news %}
             <article class="news-item">
-                <span class="news-num">{{ loop.index }}</span>
-                <div class="news-content">
+                <div class="news-header">
+                    <span class="news-num">{{ loop.index }}</span>
                     <h2 class="news-title">
                         <a href="{{ item.url }}" target="_blank" rel="noopener">{{ item.cn_title }}</a>
                     </h2>
+                </div>
+                <div class="news-content">
                     <p class="news-summary">{{ item.summary }}</p>
                     <div class="news-meta">
                         <span class="source">{{ item.source }}</span>
-                        <a href="{{ item.url }}" class="original-link" target="_blank" rel="noopener">原文 →</a>
+                        <a href="{{ item.url }}" class="original-link" target="_blank" rel="noopener">阅读原文 →</a>
                     </div>
                 </div>
             </article>
@@ -52,7 +60,7 @@ INDEX_TEMPLATE = '''<!DOCTYPE html>
                 <a href="./archive/" class="nav-link">历史归档</a>
             </div>
             <p class="footer-info">
-                每日8:00自动更新 · 
+                每日8:00自动更新 · 已剔除军机/直升机/商飞相关新闻 ·
                 <a href="https://github.com/{{ github_user }}/aviation-daily">GitHub</a>
             </p>
         </footer>

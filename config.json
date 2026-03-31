@@ -12,36 +12,81 @@
       "type": "rss",
       "enabled": true
     },
-    "simpleflying": {
-      "name": "Simple Flying",
-      "url": "https://simpleflying.com/feed/",
-      "type": "rss",
-      "enabled": true
-    },
-    "airlive": {
-      "name": "AirLive",
-      "url": "https://www.airlive.net/feed/",
-      "type": "rss",
-      "enabled": true
-    },
-    "atw": {
-      "name": "ATW Online",
-      "url": "https://atwonline.com/rss",
-      "type": "rss",
-      "enabled": true
-    },
     "reuters_aerospace": {
       "name": "Reuters Aerospace",
-      "url": "https://www.reuters.com/business/aerospace-defense/rss",
+      "url": "https://www.reuters.com/business/aerospace-defense/rss.xml",
+      "type": "rss",
+      "enabled": true
+    },
+    "boeing_news": {
+      "name": "Boeing News",
+      "url": "https://news.boeing.com/rss",
+      "type": "rss",
+      "enabled": true
+    },
+    "airbus_news": {
+      "name": "Airbus News",
+      "url": "https://www.airbus.com/en/rss.xml",
+      "type": "rss",
+      "enabled": true
+    },
+    "atw_online": {
+      "name": "ATW Online",
+      "url": "https://atwonline.com/rss.xml",
+      "type": "rss",
+      "enabled": true
+    },
+    "flight_chicago": {
+      "name": "Flight Global Chicago",
+      "url": "https://www.flightglobal.com/chicago/rss",
+      "type": "rss",
+      "enabled": true
+    },
+    "pns_daily": {
+      "name": "PNS Daily",
+      "url": "https://pnsdaily.com/feed/",
+      "type": "rss",
+      "enabled": true
+    },
+    "ain_online": {
+      "name": "AIN Online",
+      "url": "https://www.ainonline.com/rss.xml",
+      "type": "rss",
+      "enabled": true
+    },
+    "ch_aviation": {
+      "name": "CH-Aviation",
+      "url": "https://www.ch-aviation.com/rss",
       "type": "rss",
       "enabled": true
     }
   },
   "settings": {
-    "max_news_per_source": 5,
-    "max_news_for_summary": 20,
+    "max_news_per_source": 8,
+    "max_news_for_summary": 40,
     "final_news_count": 8,
     "date_format": "%Y-%m-%d",
-    "timezone": "Asia/Shanghai"
+    "timezone": "Asia/Shanghai",
+    "summary_min_length": 100,
+    "summary_max_length": 200
+  },
+  "filtering": {
+    "exclude_keywords": [
+      "fighter jet", "military helicopter", "defense contract", "weapon",
+      "COMAC", "C919", "ARJ21", "C929", "中国商飞", "military aircraft",
+      "bomber", "tanker", "cargo military", "air force", "navy", "army"
+    ],
+    "include_keywords": [
+      "Boeing", "Airbus", "supply chain", "engine", "GE Aviation", "Rolls-Royce",
+      "Pratt & Whitney", "delivery", "order", "Iran", "Middle East", "Russia",
+      "SSJ", "MC-21", "PD-14", "sanctions", "tariff", "trade war", "aviation safety",
+      "crash", "investigation", "NTSB", "regulator", "FAA", "EASA"
+    ],
+    "priority_topics": [
+      "Iran conflict aviation impact",
+      "post-pandemic supply chain recovery",
+      "Russia domestic aircraft program",
+      "Russia import substitution"
+    ]
   }
 }
