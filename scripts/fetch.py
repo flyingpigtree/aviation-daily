@@ -19,6 +19,53 @@ def get_domain(url):
     return urlparse(url).netloc.replace('www.', '')
 
 
+def get_time_window():
+    """获取抓取时间窗口：昨日8点至当日8点"""
+    now = datetime.now()
+    # 当日8点
+    today_8am = now.replace(hour=8, minute=0, second=0, microsecond=0)
+    # 昨日8点
+    yesterday_8am = today_8am - timedelta(days=1)
+    
+    # 如果当前时间早于8点，则调整窗口
+    if now.hour < 8:
+        today_8am = today_8am - timedelta(days=1)
+        yesterday_8am = yesterday_8am - timedelta(days=1)
+    
+    return yesterday_8am, today_8am
+
+
+def parse_datetime(entry):
+    """解析RSS条目的发布时间，返回datetime对象"""
+    try:
+        # 优先使用解析好的时间元组
+        if hasattr(entry, 'published_parsed') and entry.published_parsed:
+            return datetime(*entry.published_parsed[:6])
+        if hasattr(entry, 'updated_parsed') and entry.updated_parsed:
+            return datetime(*entry.updated_parsed[:6])
+        
+        # 尝试解析字符串格式
+        import time
+        for field in ['published', 'updated']:
+            if hasattr(entry, field):
+                date_str = getattr(entry, field)
+                if date_str:
+                    # 尝试RFC 2822格式
+                    try:
+                        parsed = time.strptime(date_str, '%a, %d %b %Y %H:%M:%S %z')
+                        return datetime.fromtimestamp(time.mktime(parsed))
+                    except:
+                        pass
+                    # 尝试ISO格式
+                    try:
+                        return datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+                    except:
+                        pass
+    except Exception:
+        pass
+    return None
+
+
 def fetch_rss(source_id, source_config):
     """抓取RSS源"""
     if not source_config.get('enabled', True):
@@ -27,30 +74,20 @@ def fetch_rss(source_id, source_config):
     try:
         feed = feedparser.parse(source_config['url'])
         items = []
+        
+        # 获取24小时时间窗口
+        window_start, window_end = get_time_window()
 
-        today = datetime.now().date()
-        yesterday = today - timedelta(days=1)
-
-        for entry in feed.entries[:config['settings']['max_news_per_source'] * 2]:  # 多抓一些用于过滤
-            # 提取日期
-            published = entry.get('published', entry.get('updated', ''))
-
-            # 尝试解析日期
-            news_date = None
-            try:
-                # 尝试常见日期格式
-                for date_field in ['published_parsed', 'updated_parsed', 'published', 'updated']:
-                    if hasattr(entry, date_field):
-                        date_val = getattr(entry, date_field)
-                        if date_val:
-                            if isinstance(date_val, tuple):
-                                news_date = datetime(*date_val[:6]).date()
-                            break
-            except Exception:
-                pass
-
-            # 如果没有解析到日期或日期不是今天/昨天，跳过
-            if news_date and news_date not in [today, yesterday]:
+        for entry in feed.entries[:config['settings']['max_news_per_source'] * 3]:
+            # 解析发布时间
+            news_datetime = parse_datetime(entry)
+            
+            # 如果没有解析到时间，跳过
+            if not news_datetime:
+                continue
+            
+            # 只保留在昨日8点至当日8点之间的新闻
+            if not (window_start <= news_datetime <= window_end):
                 continue
 
             # 生成唯一ID
@@ -61,8 +98,9 @@ def fetch_rss(source_id, source_config):
                 'id': news_id,
                 'title': entry.title,
                 'link': entry.link,
-                'summary': entry.get('summary', '')[:300],
-                'published': published,
+                'summary': entry.get('summary', '')[:500],
+                'published': entry.get('published', entry.get('updated', '')),
+                'published_datetime': news_datetime.isoformat(),
                 'source': source_config['name'],
                 'domain': get_domain(entry.link)
             })
@@ -70,7 +108,7 @@ def fetch_rss(source_id, source_config):
             if len(items) >= config['settings']['max_news_per_source']:
                 break
 
-        print(f"✓ {source_config['name']}: {len(items)}条")
+        print(f"✓ {source_config['name']}: {len(items)}条 ({window_start.strftime('%Y-%m-%d %H:%M')} ~ {window_end.strftime('%Y-%m-%d %H:%M')})")
         return items
 
     except Exception as e:
@@ -82,7 +120,11 @@ def fetch_all_news():
     """抓取所有源的新闻"""
     all_news = []
     
+    # 获取时间窗口
+    window_start, window_end = get_time_window()
+    
     print("开始抓取新闻...")
+    print(f"时间窗口: {window_start.strftime('%Y-%m-%d %H:%M')} ~ {window_end.strftime('%Y-%m-%d %H:%M')}")
     print("-" * 40)
     
     for source_id, source_config in config['sources'].items():
@@ -91,6 +133,9 @@ def fetch_all_news():
     
     print("-" * 40)
     print(f"总计抓取: {len(all_news)}条")
+    
+    # 按发布时间排序
+    all_news.sort(key=lambda x: x.get('published_datetime', ''), reverse=True)
     
     # 去重（基于ID）
     seen_ids = set()

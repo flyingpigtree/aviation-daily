@@ -5,7 +5,7 @@
 import json
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # 尝试导入Kimi SDK，如果没有则使用requests
 try:
@@ -45,6 +45,10 @@ def summarize_with_kimi(news_list):
 
     prompt = f"""你是航空行业编辑。请从以下国际航空新闻中，选出最重要的8条。
 
+【重要：时间筛选】
+只选择发布时间在过去24小时内的新闻（昨日8:00至今日8:00）。
+如果某条新闻的发布时间明显早于这个时间窗口，请跳过不选。
+
 【信息筛选标准 - 严格遵循】
 
 ✅ 优先选择以下类型的新闻：
@@ -62,13 +66,15 @@ def summarize_with_kimi(news_list):
 2. 中国商飞COMAC自身的动作、交付、订单等内部信息
 3. 航空公司单纯的财务报告、人事变动、营销新闻
 4. 通用航空/私人飞机的非产业影响新闻
+5. 发布时间超过24小时的旧闻
 
 【内容质量约束 - 必须遵守】
 
 1. **日期准确**
-   - 必须使用新闻原文中明确提及的日期
+   - 必须使用新闻原文中明确提及的发布日期（精确到日）
    - 若原文未提及具体日期，使用"近日"或"据报道"
    - 严禁编造或推测日期
+   - 在摘要开头标注准确日期：如"3月31日"、"3月30日晚间"
 
 2. **客观陈述**
    - 使用中性、客观的编辑语言
@@ -91,6 +97,7 @@ def summarize_with_kimi(news_list):
 对每条新闻：
 1. 标题翻译为简洁中文（15字以内）
 2. 生成结构化摘要（100-200字），必须包含：
+   - 在摘要开头标注准确日期（如"3月31日，"）
    - 核心事实：发生了什么（时间、地点、主体、事件）
    - 原文提及的影响或背景（如有）
    - 关键数据（保留原文数字）
@@ -103,13 +110,13 @@ def summarize_with_kimi(news_list):
 [
   {{
     "cn_title": "中文标题",
-    "summary": "100-200字摘要，客观陈述事实，避免推测和宣传口吻",
+    "summary": "日期：准确日期。100-200字摘要，客观陈述事实，避免推测和宣传口吻",
     "url": "原文链接",
     "source": "来源名称"
   }}
 ]
 
-只输出JSON数组，共8条。确保每篇摘要都基于原文事实，不添加个人分析。"""
+只输出JSON数组，共8条。确保每篇摘要都基于原文事实，时间准确，不添加个人分析。"""
 
     try:
         if USE_SDK:
@@ -177,8 +184,34 @@ def load_raw_news():
     with open(filename, 'r', encoding='utf-8') as f:
         data = json.load(f)
 
-    print(f"✓ 加载当天新闻: {filename}, 共 {len(data)} 条")
-    return data
+    # 筛选近24小时的新闻（昨日8点至当日8点）
+    now = datetime.now()
+    today_8am = now.replace(hour=8, minute=0, second=0, microsecond=0)
+    yesterday_8am = today_8am - timedelta(days=1)
+    
+    if now.hour < 8:
+        today_8am = today_8am - timedelta(days=1)
+        yesterday_8am = yesterday_8am - timedelta(days=1)
+
+    filtered_news = []
+    for item in data:
+        pub_time = item.get('published_datetime', '')
+        if pub_time:
+            try:
+                pub_dt = datetime.fromisoformat(pub_time.replace('Z', '+00:00').replace('+00:00', ''))
+                if yesterday_8am <= pub_dt <= today_8am:
+                    filtered_news.append(item)
+            except:
+                # 无法解析时间，保留
+                filtered_news.append(item)
+        else:
+            # 无时间信息，保留
+            filtered_news.append(item)
+
+    print(f"✓ 加载当天新闻: {filename}")
+    print(f"✓ 近24小时窗口: {yesterday_8am.strftime('%Y-%m-%d %H:%M')} ~ {today_8am.strftime('%Y-%m-%d %H:%M')}")
+    print(f"✓ 筛选后新闻: {len(filtered_news)} 条 (原始 {len(data)} 条)")
+    return filtered_news
 
 
 def save_summarized_news(news_list):
