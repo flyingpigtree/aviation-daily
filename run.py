@@ -2,12 +2,20 @@
 
 import subprocess
 import sys
+import os
+
+# 使用虚拟环境的Python
+VENV_PYTHON = os.path.join(os.path.dirname(__file__), 'venv', 'bin', 'python')
+if os.path.exists(VENV_PYTHON):
+    PYTHON = VENV_PYTHON
+else:
+    PYTHON = sys.executable
 
 def run_step(name, script):
     print(f"\n{'='*50}")
     print(f"步骤: {name}")
     print('='*50)
-    result = subprocess.run([sys.executable, f"scripts/{script}"])
+    result = subprocess.run([PYTHON, f"scripts/{script}"])
     if result.returncode != 0:
         print(f"错误: {name} 失败")
         sys.exit(1)

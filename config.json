@@ -12,41 +12,26 @@
       "type": "rss",
       "enabled": true
     },
+    "aerotime": {
+      "name": "AeroTime",
+      "url": "https://www.aerotime.aero/rss.xml",
+      "type": "rss",
+      "enabled": true,
+      "priority": "high"
+    },
     "reuters_aerospace": {
       "name": "Reuters Aerospace",
       "url": "https://www.reuters.com/business/aerospace-defense/rss.xml",
       "type": "rss",
       "enabled": true
     },
-    "boeing_news": {
-      "name": "Boeing News",
-      "url": "https://news.boeing.com/rss",
+    "aviation21": {
+      "name": "Aviation21 (Russian)",
+      "url": "https://aviation21.ru/feed/",
       "type": "rss",
-      "enabled": true
-    },
-    "airbus_news": {
-      "name": "Airbus News",
-      "url": "https://www.airbus.com/en/rss.xml",
-      "type": "rss",
-      "enabled": true
-    },
-    "atw_online": {
-      "name": "ATW Online",
-      "url": "https://atwonline.com/rss.xml",
-      "type": "rss",
-      "enabled": true
-    },
-    "flight_chicago": {
-      "name": "Flight Global Chicago",
-      "url": "https://www.flightglobal.com/chicago/rss",
-      "type": "rss",
-      "enabled": true
-    },
-    "pns_daily": {
-      "name": "PNS Daily",
-      "url": "https://pnsdaily.com/feed/",
-      "type": "rss",
-      "enabled": true
+      "enabled": true,
+      "language": "ru",
+      "focus": "russia_domestic_aircraft"
     },
     "ain_online": {
       "name": "AIN Online",
@@ -59,34 +44,70 @@
       "url": "https://www.ch-aviation.com/rss",
       "type": "rss",
       "enabled": true
+    },
+    "airbus_news": {
+      "name": "Airbus News",
+      "url": "https://www.airbus.com/en/rss.xml",
+      "type": "rss",
+      "enabled": true
+    },
+    "boeing_news": {
+      "name": "Boeing News",
+      "url": "https://news.boeing.com/rss",
+      "type": "rss",
+      "enabled": true
+    },
+    "atw_online": {
+      "name": "ATW Online",
+      "url": "https://atwonline.com/rss.xml",
+      "type": "rss",
+      "enabled": true
     }
   },
   "settings": {
-    "max_news_per_source": 8,
-    "max_news_for_summary": 40,
+    "max_news_per_source": 10,
+    "max_news_for_summary": 50,
     "final_news_count": 8,
     "date_format": "%Y-%m-%d",
     "timezone": "Asia/Shanghai",
     "summary_min_length": 100,
-    "summary_max_length": 200
+    "summary_max_length": 200,
+    "time_window_hours": 24
   },
   "filtering": {
     "exclude_keywords": [
       "fighter jet", "military helicopter", "defense contract", "weapon",
       "COMAC", "C919", "ARJ21", "C929", "中国商飞", "military aircraft",
-      "bomber", "tanker", "cargo military", "air force", "navy", "army"
+      "bomber", "tanker", "cargo military", "air force", "navy", "army",
+      "Т-45", "T-45", "training aircraft", "military transition"
     ],
     "include_keywords": [
       "Boeing", "Airbus", "supply chain", "engine", "GE Aviation", "Rolls-Royce",
       "Pratt & Whitney", "delivery", "order", "Iran", "Middle East", "Russia",
-      "SSJ", "MC-21", "PD-14", "sanctions", "tariff", "trade war", "aviation safety",
-      "crash", "investigation", "NTSB", "regulator", "FAA", "EASA"
+      "SSJ", "MC-21", "MS-21", "PD-8", "PD-14", "sanctions", "tariff", "trade war",
+      "aviation safety", "crash", "investigation", "NTSB", "regulator", "FAA", "EASA",
+      "Spirit AeroSystems", "supply crisis", "production delay"
     ],
     "priority_topics": [
       "Iran conflict aviation impact",
+      "Middle East airspace closure",
+      "war risk insurance aviation",
       "post-pandemic supply chain recovery",
       "Russia domestic aircraft program",
-      "Russia import substitution"
+      "Russia import substitution",
+      "SSJ-New", "MC-21 certification", "PD-14 engine"
+    ]
+  },
+  "notes": {
+    "high_quality_sources": [
+      "AeroTime - 优质英文航空媒体",
+      "Aviation Week - 行业深度分析",
+      "Aviation21 - 俄罗斯国产客机进展（俄语）"
+    ],
+    "requires_subscription": [
+      "Aviation Week AWIN",
+      "Cirium Dashboard",
+      "Seattle Times (blocked in CN)"
     ]
   }
 }
