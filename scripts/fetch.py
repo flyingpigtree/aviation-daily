@@ -8,6 +8,11 @@ import hashlib
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
 import os
+import sys
+
+# 添加scripts目录到路径
+sys.path.insert(0, os.path.dirname(__file__))
+from database import init_db, save_raw_news
 
 # 加载配置
 with open('config.json', 'r', encoding='utf-8') as f:
@@ -151,8 +156,8 @@ def fetch_all_news():
     return unique_news[:config['settings']['max_news_for_summary']]
 
 
-def save_raw_news(news_list):
-    """保存原始新闻"""
+def save_raw_news_file(news_list):
+    """保存原始新闻到文件（备用）"""
     today = datetime.now().strftime('%Y-%m-%d')
     os.makedirs('data', exist_ok=True)
     
@@ -160,14 +165,26 @@ def save_raw_news(news_list):
     with open(filename, 'w', encoding='utf-8') as f:
         json.dump(news_list, f, ensure_ascii=False, indent=2)
     
-    print(f"已保存: {filename}")
+    print(f"已保存JSON: {filename}")
     return filename
 
 
 if __name__ == '__main__':
+    # 初始化数据库
+    init_db()
+    
+    # 抓取新闻
     news = fetch_all_news()
     if news:
-        save_raw_news(news)
+        today = datetime.now().strftime('%Y-%m-%d')
+        
+        # 保存到数据库
+        inserted = save_raw_news(news, today)
+        print(f"✓ 数据库新增: {inserted}条")
+        
+        # 同时保存JSON（备用）
+        save_raw_news_file(news)
+        
         print("\n新闻抓取完成，准备生成摘要...")
     else:
         print("\n未获取到新闻，请检查数据源配置")

@@ -7,6 +7,10 @@ import os
 import sys
 from datetime import datetime, timedelta
 
+# 添加scripts目录到路径
+sys.path.insert(0, os.path.dirname(__file__))
+from database import update_summaries, export_to_json
+
 # 尝试导入Kimi SDK，如果没有则使用requests
 try:
     from openai import OpenAI
@@ -214,8 +218,8 @@ def load_raw_news():
     return filtered_news
 
 
-def save_summarized_news(news_list):
-    """保存摘要后的新闻"""
+def save_summarized_news_file(news_list):
+    """保存摘要后的新闻到文件（备用）"""
     today = datetime.now().strftime('%Y-%m-%d')
     filename = f'data/summarized_news_{today}.json'
     
@@ -227,7 +231,7 @@ def save_summarized_news(news_list):
             'news': news_list
         }, f, ensure_ascii=False, indent=2)
     
-    print(f"已保存摘要: {filename}")
+    print(f"已保存JSON摘要: {filename}")
     return filename
 
 
@@ -246,8 +250,16 @@ if __name__ == '__main__':
         summarized = summarize_with_kimi(raw_news)
         
         if summarized:
+            today = datetime.now().strftime('%Y-%m-%d')
             print(f"生成了 {len(summarized)} 条摘要")
-            save_summarized_news(summarized)
+            
+            # 保存到数据库
+            updated = update_summaries(summarized, today)
+            print(f"✓ 数据库更新: {updated}条")
+            
+            # 同时保存JSON（备用，用于网页生成）
+            save_summarized_news_file(summarized)
+            
             print("\n摘要生成完成，准备构建网站...")
         else:
             print("摘要生成失败")
