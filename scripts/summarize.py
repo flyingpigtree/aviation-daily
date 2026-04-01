@@ -29,7 +29,7 @@ def get_kimi_client():
     if USE_SDK:
         return OpenAI(
             api_key=api_key,
-            base_url="https://api.moonshot.cn/v1"
+            base_url="https://api.kimi.com/coding/v1"  # 使用coding端点
         )
     else:
         return api_key
@@ -149,7 +149,7 @@ def summarize_with_kimi(news_list):
                 "temperature": 0.3
             }
             resp = requests.post(
-                "https://api.moonshot.cn/v1/chat/completions",
+                "https://api.kimi.com/coding/v1/chat/completions",  # 使用coding端点
                 headers=headers,
                 json=data,
                 timeout=120

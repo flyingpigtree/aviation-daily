@@ -23,7 +23,8 @@
       "name": "Reuters Aerospace",
       "url": "https://www.reuters.com/business/aerospace-defense/rss.xml",
       "type": "rss",
-      "enabled": true
+      "enabled": false,
+      "note": "连接超时，暂时禁用"
     },
     "aviation21": {
       "name": "Aviation21 (Russian)",
@@ -35,7 +36,7 @@
     },
     "ain_online": {
       "name": "AIN Online",
-      "url": "https://www.ainonline.com/rss.xml",
+      "url": "https://www.ainonline.com/feed/",
       "type": "rss",
       "enabled": true
     },
@@ -43,7 +44,8 @@
       "name": "CH-Aviation",
       "url": "https://www.ch-aviation.com/rss",
       "type": "rss",
-      "enabled": true
+      "enabled": false,
+      "note": "RSS源失效，暂时禁用"
     },
     "airbus_news": {
       "name": "Airbus News",
@@ -53,9 +55,10 @@
     },
     "boeing_news": {
       "name": "Boeing News",
-      "url": "https://news.boeing.com/rss",
+      "url": "https://boeing.mediaroom.com/news.rss",
       "type": "rss",
-      "enabled": true
+      "enabled": false,
+      "note": "RSS源失效，暂时禁用"
     },
     "atw_online": {
       "name": "ATW Online",

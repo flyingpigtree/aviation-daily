@@ -9,6 +9,11 @@ from datetime import datetime, timedelta
 from urllib.parse import urlparse
 import os
 import sys
+import socket
+import requests
+
+# 设置全局socket超时（秒）
+socket.setdefaulttimeout(20)
 
 # 添加scripts目录到路径
 sys.path.insert(0, os.path.dirname(__file__))
@@ -76,8 +81,25 @@ def fetch_rss(source_id, source_config):
     if not source_config.get('enabled', True):
         return []
 
+    url = source_config['url']
+    
+    # 先用requests获取内容（带10秒超时）
     try:
-        feed = feedparser.parse(source_config['url'])
+        response = requests.get(url, timeout=10, headers={
+            'User-Agent': 'Mozilla/5.0 (compatible; AviationBot/1.0)'
+        })
+        response.raise_for_status()
+        content = response.content
+    except requests.Timeout:
+        print(f"⚠ {source_config['name']}: 请求超时")
+        return []
+    except Exception as e:
+        print(f"✗ {source_config['name']}: 请求失败")
+        return []
+
+    # 用feedparser解析内容
+    try:
+        feed = feedparser.parse(content)
         items = []
         
         # 获取24小时时间窗口
@@ -117,7 +139,7 @@ def fetch_rss(source_id, source_config):
         return items
 
     except Exception as e:
-        print(f"✗ {source_config['name']}: {str(e)}")
+        print(f"✗ {source_config['name']}: 解析失败 - {str(e)[:50]}")
         return []
 
 
